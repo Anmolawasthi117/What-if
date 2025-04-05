@@ -1,55 +1,54 @@
 // src/components/Homepage.jsx
 import React, { useState } from "react";
-import { useDispatch } from "react-redux";
-import { useNavigate } from "react-router-dom";
-import { setSceneInput } from "../store/Slices/sceneSlice"; 
+import { useDispatch, useSelector } from "react-redux";
+import { setSceneInput, setScenes, startLoading, setError } from "../store/Slices/sceneSlice";
+import sceneWrapper from "../utils/sceneWrapper";
+import InputBox from "./InputBox";
+import StoryDisplay from "./StoryDisplay";
 
 const Homepage = () => {
-  const [input, setInput] = useState(""); // Local state for input
   const dispatch = useDispatch();
-  const navigate = useNavigate();
+  const { scenes, loading, error } = useSelector((state) => state.scene);
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+  const handleSubmit = async (input) => {
     if (input.trim() === "") {
       alert("Bhai, kuch toh likh pehle!");
       return;
     }
-    // Input ko Redux store mein save karo
-    dispatch(setSceneInput(input));
-    // Story page pe redirect karo
-    navigate("/story");
-    setInput(""); // Input clear kar do
+
+    dispatch(setSceneInput(input)); // Input save karo
+    dispatch(startLoading()); // Loading shuru
+
+    try {
+      const scenesData = await sceneWrapper(input);
+      if (scenesData.length === 0) {
+        throw new Error("Koi scene nahi mila!");
+      }
+      dispatch(setScenes(scenesData)); // Scenes save karo
+    } catch (err) {
+      dispatch(setError(err.message));
+    }
   };
 
   return (
     <div className="min-h-screen bg-gray-900 text-white flex flex-col items-center justify-center p-4">
-      {/* Heading */}
       <h1 className="text-4xl font-bold mb-8">What if...</h1>
 
-      {/* Chat Input Box */}
-      <form onSubmit={handleSubmit} className="w-full max-w-lg">
-        <div className="flex items-center bg-gray-800 rounded-lg p-2 shadow-lg">
-          <input
-            type="text"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            placeholder="Apna 'What if' scenario likh de..."
-            className="flex-1 bg-transparent outline-none text-white placeholder-gray-400 p-2"
-          />
-          <button
-            type="submit"
-            className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg"
-          >
-            Submit
-          </button>
-        </div>
-      </form>
+      {/* Input Box */}
+      <InputBox onSubmit={handleSubmit} />
 
-      {/* Optional Hint */}
-      <p className="mt-4 text-gray-400">
-        Jaise: "What if mai time travel kar pau?"
-      </p>
+      {/* Loader ya Story */}
+      {loading ? (
+        <div className="flex items-center justify-center mt-8">
+          <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+        </div>
+      ) : error ? (
+        <p className="mt-8 text-red-500">Error: {error}</p>
+      ) : scenes.length > 0 ? (
+        <StoryDisplay scenes={scenes} />
+      ) : (
+        <p className="mt-8 text-gray-400">Apna scenario daal ke story dekho!</p>
+      )}
     </div>
   );
 };

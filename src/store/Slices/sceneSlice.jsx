@@ -4,8 +4,10 @@ import { createSlice } from "@reduxjs/toolkit";
 const sceneSlice = createSlice({
   name: "scene",
   initialState: {
-    input: "",
-    scenes: [],
+    input: "", // User ka input
+    scenes: [], // Scenes ka array
+    loading: false, // API call ke liye loading state
+    error: null, // Error handling
   },
   reducers: {
     setSceneInput: (state, action) => {
@@ -13,9 +15,19 @@ const sceneSlice = createSlice({
     },
     setScenes: (state, action) => {
       state.scenes = action.payload;
+      state.loading = false;
+      state.error = null;
+    },
+    startLoading: (state) => {
+      state.loading = true;
+      state.error = null;
+    },
+    setError: (state, action) => {
+      state.loading = false;
+      state.error = action.payload;
     },
   },
 });
 
-export const { setSceneInput, setScenes } = sceneSlice.actions;
-export default sceneSlice.reducer; // Default export yahan hai
+export const { setSceneInput, setScenes, startLoading, setError } = sceneSlice.actions;
+export default sceneSlice.reducer;
