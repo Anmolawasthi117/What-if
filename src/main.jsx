@@ -14,6 +14,7 @@ import {
 import "./index.css";
 import ReactDOM from "react-dom/client";
 import Homepage from "./components/HomePage.jsx";
+import WhatIf from "./components/WhatIf.jsx";
 
 const appRouter = createBrowserRouter([
   {
@@ -24,7 +25,10 @@ const appRouter = createBrowserRouter([
         path: "/",
         element: <Homepage />,
       },
-    
+      {
+        path: "/whatif",
+        element: <WhatIf />,
+      },
     ],
   },
 ]);

@@ -1,11 +1,9 @@
 import { configureStore } from "@reduxjs/toolkit";
-import sceneReducer from "./Slices/sceneSlice"; 
-import imageReducer from "./Slices/imageSlice"; 
+import sceneSlice from "./Slices/sceneSlice";
 
 const appStore = configureStore({
   reducer: {
-    scene: sceneReducer,
-    image: imageReducer,
+    data: sceneSlice,
   },
 });
 
